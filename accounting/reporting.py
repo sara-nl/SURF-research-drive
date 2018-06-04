@@ -23,7 +23,7 @@ dbhost_acc=''
 dbpass_acc=''
 
 surfdrivelink=''
-surfdriveurl=''
+surfdriveurl='https://surfdrive.surf.nl/files/public.php/webdav'
 notfound='404'
 http20x=re.compile('20.*')
 
@@ -32,8 +32,6 @@ tb=1000000000000.0
 logfile='/var/log/reporting.log'
 
 sender=''
-to1=['','']
-to2=['']
 
 mail_text="""
 
@@ -124,12 +122,12 @@ def main():
      
     f=open(csv,'w')
     f.write(';;;;;;;;;;;;;\n')
-    f.write('cuser;description;email;ocgroup;quote;infra;project;usage TB;quotum TB;e-infra;contact OPS; contact BD; start date; end date\n')
+    f.write('contact;group;description;email;quote;infra;project;usage TB;quotum TB;e-infra;contact OPS; contact BD; start date; end date\n')
     f.write(';;;;;;;;;;;;;\n')
     conn=connect(dbhost_acc,dbuser_acc,dbpass_acc,db_acc)
     c=conn.cursor()
 
-    crmdb_query="""select ocgroup,cuser,description,project,quote,infra,email,einfra,quotum_gb,contact_ops,contact_bd,start_date,end_date from crmdb;"""
+    crmdb_query="""select contact,ocgroup,description,project,quote,infra,email,einfra,quotum_gb,contact_ops,contact_bd,start_date,end_date from crmdb;"""
     c.execute(crmdb_query)
     groups={}
     for r in c:
@@ -151,7 +149,7 @@ def main():
         quote=''
         project=''
         description=''
-        cuser=''
+        ocgroup=''
 
         if groups[group][11]!=None: end_date=groups[group][11].isoformat()
         if groups[group][10]!=None: start_date=groups[group][10].isoformat()
@@ -163,18 +161,23 @@ def main():
         if groups[group][4]!=None: table=groups[group][4]
         if groups[group][3]!=None: quote=groups[group][3]
         if groups[group][2]!=None: project=groups[group][2]
-        if groups[group][1]!=None: description=groups[group][1]
-        if groups[group][0]!=None: cuser=groups[group][0]
+        if groups[group][1]!=None: ocgroup=groups[group][1]
+        if groups[group][0]!=None: description=groups[group][0]
 
-        query="select sum(bytes) from "+table+"_usage where date='"+thisdate+"' and ( gid='"+group+"' or gid='"+group+"_' );"
-        c.execute(query)
+        query="select sum(bytes) from "+table+"_usage where date='"+thisdate+"' and ( gid='"+ocgroup+"' or gid='"+ocgroup+"_' );"
+        try:
+            c.execute(query)
+        except mysql.connector.errors.ProgrammingError as err:
+            if err.errno == mysql.connector.errorcode.ER_NO_SUCH_TABLE: continue
+            print "Error: {}".format(err)
+            sys.exit(1)
 
         terab=c.fetchone()[0]
         if terab!=None:
             terabytes=str(round(float(terab)/tb,3))
         else:
             terabytes='0.0'
-        f.write(cuser+';'+description+';'+email+';'+group+';'+quote+';'+table+';'+project+';'+terabytes+';'+quotum+';'+einfra+';'+contact_ops+';'+contact_bd+';'+start_date+';'+end_date+'\n')
+        f.write(group+';'+description+';'+email+';'+group+';'+quote+';'+table+';'+project+';'+terabytes+';'+quotum+';'+einfra+';'+contact_ops+';'+contact_bd+';'+start_date+';'+end_date+'\n')
 
     f.close()
             
@@ -184,9 +187,9 @@ def main():
 
     if is1st:
         p=get_vorigemaand()
-        to=to1
+        to=['','']
     else:
-        to=to2
+        to=['']
         p=get_vandaag()
     send_mail(sender,to,'ResearchDrive accounting '+p,mail_text%(p),[ csv ])
 
