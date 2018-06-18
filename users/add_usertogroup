@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+
+import sys,random,string
+from utility import get_input,get_api,process_commandline_input
+
+args=process_commandline_input('Add user to a group','usergroup')
+
+username=args.user
+groupname=args.group
+
+api=get_api(args.infra)
+
+status,result=api.add_user_to_group(username,groupname)
+
+if status:
+    print('User '+username+' succesfully added to group '+groupname+'\n')
+else:
+    if result==None: result=''
+    sys.stderr.write('Could not add user '+username+' to group '+groupname+': '+result+'\n')
+    sys.exit(1)

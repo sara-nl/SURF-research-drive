@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+
+import sys
+from utility import get_input,get_api,process_commandline_input
+
+args=process_commandline_input('Delete user','user')
+
+username=args.user
+
+api=get_api(args.infra)
+
+status,result=api.delete_user(username)
+
+if status:
+    print('User '+username+' deleted\n')
+else:
+    if result==None: result=''
+    sys.stderr.write('Could not delete user '+username+': '+result+'\n')
+    sys.exit(1)
