@@ -38,10 +38,12 @@ class API:
 
 
 
-    def __send_request__(self, verb, path, query='', body='', headers=None, properties=None):
+    def __send_request__(self, verb, path, query='', body=None, headers=None, properties=None):
 # Sends request to server
         if not headers:
             headers = {}
+        if not body:
+            body = {}
         response = self._session.request(verb, path, params=query, data=body, headers=headers)
 
         return response
@@ -224,3 +226,29 @@ class API:
         if not status: return status,message
 
         return True,''
+
+    def get_all_apps(self):
+        return self.__get_all__('apps')
+
+    def get_app_info(self,app):
+        return self.__get_info__(app,'apps')
+
+    def enable_app(self,app):
+        requestpath = '{0}/{1}/{2}'.format(self._requestpath, 'apps', app)
+
+        response=self.__send_request__('POST', requestpath)
+        
+        status,message=self.__handle_response__(response)
+        if not status: return status,message
+
+        return True,''
+
+    def disable_app(self,app):
+        requestpath = '{0}/{1}/{2}'.format(self._requestpath, 'apps', app)
+
+        response=self.__send_request__('DELETE', requestpath)
+        status,message=self.__handle_response__(response)
+        if not status: return status,message
+
+        return True,''
+

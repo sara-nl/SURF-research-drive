@@ -37,6 +37,7 @@ def process_commandline_input(text='',item=None):
     if item!=None:
         if item=='user' or item=='usergroup':
             parser.add_argument("user",help="The user that you want to perform this action for.")
+
         if item=='useredit':
             required = parser.add_argument_group('required arguments')
             required.add_argument("-k", "--key", dest = "key", required=True, help="The field to edit for a user.")
@@ -45,5 +46,8 @@ def process_commandline_input(text='',item=None):
                 
         if item=='group' or item=='usergroup':
             parser.add_argument("group",help="The group that you want to perform this action for.")
+
+        if item=='app':
+            parser.add_argument("app",help="The app that you want to perform this action for.")
 
     return parser.parse_args()

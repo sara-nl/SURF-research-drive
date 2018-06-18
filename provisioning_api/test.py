@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import requests
-from papi import API
+from provisioning import API
 import random,string
 
 url=''
@@ -91,5 +91,3 @@ print "delete_user"
 status,result=api.delete_user('rontest')
 print status,result
 
-#status,result=api.get_user_subadmin_info('ron')
-#status,result=api.create_subadmin('ron','testgroep')
