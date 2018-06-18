@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from provisioning import API
-from config import url, username, password
 import sys,argparse,os
 
 default_infra='defaultinfra'
