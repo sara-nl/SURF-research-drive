@@ -1,0 +1,33 @@
+#!/usr/bin/env python
+
+import sys
+from utility import get_input,get_api,process_commandline_input
+
+args=process_commandline_input('Get info about an app','app')
+
+appname=args.app
+
+api=get_api(args.infra)
+
+status,result=api.get_app_info(appname)
+
+print result
+if status:
+    for i in result.keys():
+        if type(result[i])is not dict:
+            print(i+': '+str(result[i]))
+        else:
+            print(i+': ')
+            for j in result[i].keys():
+                if type(result[i][j]) is list:
+                    line=''
+                    for e in result[i][j]:
+                        line+=e+','
+                    line=line[:len(line)-1]
+                    print('    '+j+': '+line)
+                else:
+                    print('    '+j+': '+str(result[i][j]))
+else:
+    if result==None: result=''
+    sys.stderr.write('Could not get info for app '+appname+': '+result+'\n')
+    sys.exit(1)

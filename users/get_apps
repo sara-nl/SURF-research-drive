@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+
+import sys
+from utility import get_input,get_api,process_commandline_input
+
+args=process_commandline_input('Get all apps')
+
+api=get_api(args.infra)
+
+status,result=api.get_all_apps()
+
+if status:
+    for app in result:
+        print(app)
+else:
+    if result==None: result=''
+    sys.stderr.write('Could not get apps: '+result+'\n')
+    sys.exit(1)
